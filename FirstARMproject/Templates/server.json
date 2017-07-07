@@ -1,0 +1,151 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "serverName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "serverAdminUserName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "serverAdminPassword": {
+      "type": "securestring"
+    },
+    "serverWindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ]
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "storagehnzl2ieskx2zk"
+    },
+    "storageAccountResourceGroup": {
+      "type": "string",
+      "defaultValue": "rg-application1"
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "network"
+    },
+    "virtualNetworkResourceGroup": {
+      "type": "string",
+      "defaultValue": "rg-network"
+    },
+    "pipDnsName": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "variables": {
+    "serverImagePublisher": "MicrosoftWindowsServer",
+    "serverImageOffer": "WindowsServer",
+    "serverOSDiskName": "[concat(parameters('serverName'), '-osdisk')]",
+    "serverVmSize": "Standard_D2_v2",
+    "serverVnetID": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+    "serverSubnetRef": "[concat(variables('serverVnetID'), '/subnets/', 'Servers')]",
+    "serverStorageAccountContainerName": "vhds",
+    "serverNicName": "[concat(parameters('serverName'), '-nic0')]",
+    "pipName": "[concat(parameters('serverName'), '-pip')]"
+
+  },
+  "resources": [
+    {
+      "name": "[variables('serverNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "northeurope",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]" ],
+      "tags": {
+        "displayName": "serverNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('serverSubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('serverName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "northeurope",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('serverNicName'))]"
+      ],
+      "tags": {
+        "displayName": "server"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('serverVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('serverName')]",
+          "adminUsername": "[parameters('serverAdminUsername')]",
+          "adminPassword": "[parameters('serverAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('serverImagePublisher')]",
+            "offer": "[variables('serverImageOffer')]",
+            "sku": "[parameters('serverWindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "serverOSDisk",
+            "vhd": {
+              "uri": "[concat(reference(resourceId(parameters('storageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('serverStorageAccountContainerName'), '/', variables('serverOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('serverNicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "[variables('pipName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "northeurope",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "pip"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('pipDnsName')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

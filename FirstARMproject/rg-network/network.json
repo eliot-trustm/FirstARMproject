@@ -1,0 +1,48 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+    "networkPrefix": "172.16.0.0/16",
+    "networkSubnet1Name": "Servers",
+    "networkSubnet1Prefix": "172.16.0.0/24",
+    "networkSubnet2Name": "DMZ",
+    "networkSubnet2Prefix": "172.16.1.0/24"
+  },
+  "resources": [
+    {
+      "name": "network",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "network"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('networkPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('networkSubnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('networkSubnet1Prefix')]"
+            }
+          },
+          {
+            "name": "[variables('networkSubnet2Name')]",
+            "properties": {
+              "addressPrefix": "[variables('networkSubnet2Prefix')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
