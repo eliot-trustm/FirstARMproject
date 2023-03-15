@@ -1,0 +1,42 @@
+{
+ "properties": {
+  "displayName": "eliot",
+  "policyType": "Custom",
+  "metadata": {
+   "category": "General",
+   "version": "1",
+   "createdBy": "b9a81bd6-d631-4270-9186-070229a959be",
+   "createdOn": "2023-03-15T09:46:01.6136417Z",
+   "updatedBy": null,
+   "updatedOn": null
+  },
+  "parameters": {
+   "initiative-param1": {
+    "type": "string",
+    "metadata": {
+     "displayName": "initiative-param1"
+    },
+    "allowedValues": [
+     "Audit",
+     "Deny"
+    ]
+   }
+  },
+  "policyDefinitions": [
+   {
+    "policyDefinitionReferenceId": "Azure firewall policy should enable TLS inspection within application rules_1",
+    "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a58ac66d-92cb-409c-94b8-8e48d7a96596",
+    "parameters": {
+     "effect": {
+      "value": "[parameters('initiative-param1')]"
+     }
+    },
+    "groupNames": []
+   }
+  ],
+  "policyDefinitionGroups": []
+ },
+ "id": "/subscriptions/8441b620-a422-4f90-9f56-b5f8bfa8e122/providers/Microsoft.Authorization/policySetDefinitions/f6c4fcb1f8c044768c16905d",
+ "type": "Microsoft.Authorization/policySetDefinitions",
+ "name": "f6c4fcb1f8c044768c16905d"
+}
