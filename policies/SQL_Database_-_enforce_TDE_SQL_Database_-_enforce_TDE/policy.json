@@ -1,0 +1,54 @@
+{
+ "properties": {
+  "displayName": "SQL Database - enforce TDE",
+  "policyType": "Custom",
+  "mode": "All",
+  "description": "Prevent TDE being disabled",
+  "metadata": {
+   "category": "SQL",
+   "version": "1.0",
+   "createdBy": "bf4aaf26-0107-4a8e-acb3-5f524bd8533e",
+   "createdOn": "2023-04-03T14:01:50.515118Z",
+   "updatedBy": "bf4aaf26-0107-4a8e-acb3-5f524bd8533e",
+   "updatedOn": "2023-04-03T14:14:28.0059546Z"
+  },
+  "parameters": {
+   "policyEffect": {
+    "type": "String",
+    "metadata": {
+     "displayName": "Policy Effect",
+     "description": "The effect of the policy."
+    },
+    "allowedValues": [
+     "Audit",
+     "Deny"
+    ],
+    "defaultValue": "Deny"
+   }
+  },
+  "policyRule": {
+   "if": {
+    "allOf": [
+     {
+      "field": "type",
+      "equals": "Microsoft.SQL/servers/databases/transparentDataEncryption"
+     },
+     {
+      "field": "Microsoft.Sql/transparentDataEncryption.status",
+      "notEquals": "enabled"
+     },
+     {
+      "field": "Microsoft.Sql/servers/databases/transparentDataEncryption/state",
+      "notEquals": "enabled"
+     }
+    ]
+   },
+   "then": {
+    "effect": "[parameters('policyEffect')]"
+   }
+  }
+ },
+ "id": "/providers/Microsoft.Management/managementGroups/mg-secops/providers/Microsoft.Authorization/policyDefinitions/SQL Database - enforce TDE",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "SQL Database - enforce TDE"
+}
